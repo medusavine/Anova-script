@@ -1,0 +1,40 @@
+#import the csv file
+aphidinfect <- read.csv(file = "C:/Users/butte/OneDrive/Desktop/BIO 1010 Scripts/Homework/ANOVAdata.csv")
+aphidinfect
+
+#to creat an ANOVA a predictor and response varible must be identified
+predictor <-aphidinfect$infectionStatus
+response <-aphidinfect$color
+
+#then set the ANOVA aov(y ~ x) is the ANOVA function
+modelaphid<- aov(response ~ predictor)
+
+#look over the results
+summary(modelaphid)
+
+#run a Tukey Test and put it in a variable
+diffmeansaphids <- TukeyHSD(modelaphid)
+
+#record the differences in groups in the vector
+groups <- c("original", "uninfected", "infected")
+statisticalgroup <- c("A", "A", "B")
+
+#Calculate means and the confidence interval using a for loop
+means <-rep(NA, 3)
+ci <-rep(NA, 3)
+
+#run the for loop, using index from the groups vector
+for (i in 1:3){
+  means[i] <-mean(aphidinfect$color[aphidinfect$infectionStatus==groups[i]])
+  sd <- sd(aphidinfect$color[aphidinfect$infectionStatus==groups[i]])
+  ci[i]<- 2*sd/sqrt(sum(aphidinfect$infectionStatus==groups[i]))
+}
+
+#create a barplot 
+barx <- barplot(means, names=groups, las=1, ylab="Aphid Color", xlab ="Infection Status", ylim =c(0, 45))
+
+#add the standard errors to show uncertainty in the graph (2*standard errors)
+segments(barx, means - ci, barx, means + ci)
+
+#add the group labels
+text(barx, 30, statisticalgroup)
