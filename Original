@@ -1,0 +1,49 @@
+#Using ANOVA
+#the data set you will use is one from a field experiment designed to investigate the effect of genetic diversity on the productivity of eel grass 
+#(this is from Whitlock and Schulter's excellent statistics textbook, the Analysis of Biological Data. Individual plants were randomly assigned to plots and there were three types of plots: 
+#one with only a single genotype of plant (all plants in the plot genetically identical), one with three different genotypes, and one with 6 different genotypes. After a period of time, the numbers of shoots per plot were recorded. The data are in EelgrassGenotypes.csv
+
+#construct a new R script (without cutting and pasting) that uses an ANOVA to test for differences in means and then summarize the data in a bar plot. Ask for help if you need it.
+#In Class ANOVA Script
+
+#import the CSV file
+eelgrass <- read.csv(file = "C:/Users/butte/OneDrive/Desktop/BIO 1010 Scripts/In Class/EelgrassGenotypes.csv")
+eelgrass
+
+#identify the predictor and response variables
+predictor <-eelgrass$treatmentGenotypes
+response <-eelgrass$shoots
+
+#then use the ANOVA function  aov(y ~ x) is the ANOVA function
+modelgrass <- aov(response ~ predictor)
+
+#look at the results of the ANOVA Function
+summary(modelgrass)
+
+#run a Tukey test and put the results into a variable
+diffmeansgrass <- TukeyHSD(modelgrass)
+
+#put the differences between groups into the vector
+groups <-c("One", "Three", "Six")
+statisticalgroup <- c("A", "AB", "B")
+
+#calculate the means and the confidence intervals with a for loop
+means<- rep(NA, 3)
+ci <- rep(NA, 3)
+
+# Use the index from the groups vector to run the for loop
+for (i in 1:3){
+  means[i] <-mean(eelgrass$shoots==groups[i])
+  sd <- mean(eelgrass$shoots[eelgrass$treatmentGenotypes==groups[i]])
+  ci[i] <- 2*sd/sqrt(sum(eelgrass$treatmentGenotypes==groups[i]))
+}
+
+#make the barplot using the data
+barx <- barplot(means, names=groups, las=1, ylab="Shoots", xlab="Treatment Genotypes", 
+                ylim=c(0, 90),width=20, col=c("red"))
+
+#show the standard error in the graph
+segments(barx, means - ci, barx, means + ci)
+
+#label the groups
+text(barx, 60, statisticalgroup)
